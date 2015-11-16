@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Image Tag Version 4 - Tag View</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <style rel="stylesheet">
+        img.thumb {
+        border: 1px solid #fefefe;
+        width: 400px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <div class="row">
+            <button id="tag-filter-add" class="btn"><span class="glyphicon glyphicon-plus"></span>Add Tag</button>
+            <select id="tag-filter-select"></select>
+
+            <div class="horizontal-list-group" id="tag-filter-tags">
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-body" id="image-grid">
+
+    </div>
+
+
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="js/bootstrap.min.js"></script>
+<script type="application/dart" src="tagviewmain.dart"></script>
+<script src="packages/browser/dart.js"></script>
+
+</body>
+</html>

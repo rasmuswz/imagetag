@@ -1,0 +1,4 @@
+name: ImageTag4
+dependencies:
+    browser:
+transformers:
