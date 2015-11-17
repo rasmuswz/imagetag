@@ -1,4 +1,6 @@
-Image Tag 
+<img src="docs/logo.png" alt="ImageTag logo"/>
+
+Image Tag - Concept and Design
 ----------
 
 With many family photos it becomes harder and harder keep track of
@@ -11,7 +13,7 @@ With this software you images are not part of a folder constituting an
 album. Instead each tag is an album and this lightweight mechanism
 allows you to separate storage order from presentation of your photos.
 
-Software Design
+Technical Overview
 ----------
 
 There is a server and a browser client. The server is written in the
