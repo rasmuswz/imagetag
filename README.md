@@ -1,4 +1,4 @@
-<img src="docs/logo.png" alt="ImageTag logo"/>
+<img src="docs/logo.png" alt="ImageTag logo" width="300px"/>
 
 Image Tag - Concept and Design
 ----------
