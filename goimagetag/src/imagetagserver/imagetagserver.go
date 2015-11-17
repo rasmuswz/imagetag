@@ -139,7 +139,7 @@ type Tag struct {
 
 func (ths *ImageTagServer) get_db() *sql.DB {
 
-	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.1:8889)/ImageTag?charset=utf8");
+	db, err := sql.Open("mysql", "root:JeeGmt17@tcp(127.0.0.1:3306)/ImageTag?charset=utf8");
 	if err != nil {
 		log.Println("Error accessing DataBase: " + err.Error());
 		return nil;
