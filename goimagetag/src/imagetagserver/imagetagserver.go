@@ -414,9 +414,8 @@ func (ths *ImageTagServer) get_tags_for_image(w http.ResponseWriter, r *http.Req
 	}
 	defer db.Close();
 
-	imgIdQ := "SELECT Id FROM Image WHERE Path LIKE '" + imgPath + "'";
-
-	q := "SELECT Id,Tag,Description FROM Tags WHERE Id IN (SELECT TagId FROM Assignment WHERE ImageId IN (" + imgIdQ + "));";
+	q := "SELECT Id,Tag,Description FROM Tags " +
+	     "WHERE Id IN (SELECT Assignment.TagId FROM Tags INNER JOIN Assignment ON Tags.Id=Assignment.TagId);"
 	res, resErr := db.Query(q);
 	if resErr != nil {
 		log.Println("DataBase Error: " + resErr.Error());
@@ -521,7 +520,6 @@ func (ths *ImageTagServer) add_tag(w http.ResponseWriter, r *http.Request) {
 	defer db.Close();
 
 	res,resErr := db.Exec("INSERT INTO Tags(Tag,Description) VALUES('"+tag+"','"+desc+"');");
-
 	if resErr != nil {
 		log.Println(resErr.Error());
 		http.Error(w,resErr.Error(),http.StatusInternalServerError);
