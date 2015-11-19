@@ -30,9 +30,14 @@ def build_go(tag):
         local("tar cmvzf "+gofile+" --exclude .git ./goimagetag/src");
     return gofile;
 
-def restart():
-    run("pgrep -f goimagetag/bin/main | xargs kill -9 ")
-    run("/bin/sh -c \"goimagetag/bin/main ./build/web /usr/local/data/3TB/Billeder & disown $!\"")
+def pack_and_send_scripts(tag,deploydir):
+    scriptFile="scripts_"+tag+".tgz";
+    local("tar cmvzf "+scriptFile+" --exclude .git ./scripts");
+    put(scriptFile,".")
+    run("tar xmfz "+scriptFile)
+
+def restart(deploydir):
+    local("ssh "+env.host_string+" \"cd "+deploydir+" && scripts/imagetag.sh restart /usr/local/data/3TB/Billeder\"");
 
 
 @task
@@ -40,8 +45,7 @@ def restart():
 def restart_wz_gl():
     tag=get_tag()
     deploydir = "/var/www/online/wz.gl/imagetag_"+tag;
-    with cd(deploydir):
-        restart()
+    restart(deploydir)
 
 @task
 @hosts(["rwz@raffinit.com"])
@@ -65,4 +69,5 @@ def deploy_wz_gl():
             run(prefix+ "&& go get github.com/disintegration/imaging")
             run(prefix+ "&& go get github.com/go-sql-driver/mysql")
             run(prefix+" && go install main");
-            restart()
+            pack_and_send_scripts(tag,deploydir)
+    restart(deploydir)

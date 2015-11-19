@@ -71,9 +71,11 @@ class ImageGridController {
   DivElement _grid;
   ImageTagModel _model;
   ViewController _viewController;
+  DivElement _large;
 
   ImageGridController(this._model) {
     _grid = querySelector("#image-grid");
+    _large = querySelector("#large-display");
   }
 
   void setViewController(ViewController vc) {
@@ -84,10 +86,22 @@ class ImageGridController {
     _grid.children.clear();
     images.forEach( (image) {
       ImageElement img = new ImageElement();
-      img.style.width = "100px";
+      img.style.width = "200px";
+      img.style.margin = "5px";
       _model.LoadThumbImage(image,img);
       _grid.children.add(img);
+      img.onClick.listen( (e) => displayLarge(image));
     });
+  }
+
+
+  void displayLarge(Image image) {
+    _large.children.clear();
+    ImageElement img = new ImageElement();
+    _model.LoadImage(image,img);
+    _large.children.add(img);
+    _large.style.display = 'block';
+    _large.onClick.listen( (e) => _large.style.display = 'none');
   }
 }
 

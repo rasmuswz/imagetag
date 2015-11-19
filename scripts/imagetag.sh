@@ -2,7 +2,8 @@
 ImagePath=${2}
 
 function start() {
-  goimagetag/bin/main ./build/web ${ImagePath}
+  goimagetag/bin/main ./build/web ${ImagePath} > imagetag.log 2>&1 &
+  disown $!
 }
 
 function stop() {
@@ -17,8 +18,8 @@ case ${1} in
     stop
     ;;
     restart)
-    start
     stop
+    start
     ;;
     *)
     echo "script supports start, stop and restart";

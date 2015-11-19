@@ -20,6 +20,7 @@ import (
 	"database/sql"
 	"strconv"
 	"errors"
+	"encoding/base64"
 )
 
 const (
@@ -302,7 +303,8 @@ func (ths *ImageTagServer) go_list_dir(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ths *ImageTagServer) go_thumb_image(w http.ResponseWriter, r *http.Request) {
-	path := r.URL.Query().Get("path");
+	imgPath := r.URL.Query().Get("path");
+	path := imgPath;
 	path = ths.imgRoot + path;
 	path = strings.Replace(path, "..", "", -1);
 
@@ -311,6 +313,35 @@ func (ths *ImageTagServer) go_thumb_image(w http.ResponseWriter, r *http.Request
 		http.Error(w, infoErr.Error(), http.StatusInternalServerError);
 		return;
 	}
+
+	db := ths.get_db();
+	if db == nil {
+		return;
+	}
+	defer db.Close();
+
+	row,rerr := db.Query("SELECT Thumb FROM Image WHERE Path LIKE '"+imgPath+"';");
+	if rerr != nil {
+		log.Println(rerr.Error());
+		http.Error(w,rerr.Error(),http.StatusInternalServerError);
+		return;
+	}
+
+	if row.Next() {
+		var result string;
+		e := row.Scan(&result);
+		if e != nil {
+			log.Println(e.Error());
+			http.Error(w,e.Error(),http.StatusInternalServerError);
+			return;
+		}
+		b,_ := base64.StdEncoding.DecodeString(result);
+
+		w.Header().Add("Content-Type", "image/jpeg");
+		w.Write(b);
+		return;
+	}
+
 
 	if info.IsDir() == true {
 		http.Error(w, "No an image", http.StatusBadRequest);
@@ -323,10 +354,23 @@ func (ths *ImageTagServer) go_thumb_image(w http.ResponseWriter, r *http.Request
 		return;
 	}
 
-	thumb := imaging.Thumbnail(img, 100, 100, imaging.CatmullRom);
+	thumb := imaging.Thumbnail(img, 300, 300, imaging.CatmullRom);
+
+	buffer := bytes.NewBuffer(nil);
+	imaging.Encode(buffer,thumb,imaging.JPEG);
+	b64 := base64.StdEncoding.EncodeToString(buffer.Bytes());
+
+	insertRes,insertResErr := db.Exec("INSERT INTO Image(Path,Thumb) VALUES('"+imgPath+"','"+b64+"');");
+	if insertResErr != nil {
+		log.Println(insertResErr.Error());
+		http.Error(w,insertResErr.Error(),http.StatusInternalServerError);
+		return;
+	}
+	iid,_ := insertRes.LastInsertId();
+	log.Println("Added image \""+imgPath+"\" with id "+strconv.FormatInt(iid,10));
 
 	w.Header().Add("Content-Type", "image/jpeg");
-	err = imaging.Encode(w, thumb, imaging.JPEG);
+	w.Write(buffer.Bytes());
 	if err != nil {
 		http.Error(w, "Failed to thumbNail image", http.StatusInternalServerError);
 		return;
@@ -415,7 +459,7 @@ func (ths *ImageTagServer) get_tags_for_image(w http.ResponseWriter, r *http.Req
 	defer db.Close();
 
 	q := "SELECT Id,Tag,Description FROM Tags " +
-	     "WHERE Id IN (SELECT Assignment.TagId FROM Tags INNER JOIN Assignment ON Tags.Id=Assignment.TagId);"
+	     "WHERE Id IN (SELECT TagId FROM Assignment WHERE ImageId IN (SELECT Id FROM Image WHERE Path LIKE '"+imgPath+"'));"
 	res, resErr := db.Query(q);
 	if resErr != nil {
 		log.Println("DataBase Error: " + resErr.Error());
@@ -471,7 +515,7 @@ func (ths *ImageTagServer) get_images_with_tags(w http.ResponseWriter, r *http.R
 	defer db.Close();
 
 	var imgPaths []string = make([]string,0);
-	q := "SELECT * FROM Image WHERE Id IN (SELECT ImageId FROM Assignment WHERE TagId = ";
+	q := "SELECT Id,Path FROM Image WHERE Id IN (SELECT ImageId FROM Assignment WHERE TagId = ";
 	for i := 0; i < len(tags); i++ {
 		rows,rowsErr := db.Query(q+"'"+tags[i]+"');");
 
@@ -485,10 +529,8 @@ func (ths *ImageTagServer) get_images_with_tags(w http.ResponseWriter, r *http.R
 		for rows.Next() {
 			var id int = 0;
 			var path string = "";
-			var desc string = "";
-			var thumb []byte = nil;
 
-			err:=rows.Scan(&id,&path,&desc,&thumb);
+			err:=rows.Scan(&id,&path);
 			if err != nil {
 				log.Println(err.Error());
 				http.Error(w,"Error: "+err.Error(),http.StatusInternalServerError);
