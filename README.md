@@ -1,5 +1,6 @@
-<img src="docs/logo.png" alt="ImageTag logo" width="300px"/>
-
+<center>
+<img src="docs/logo.png" alt="ImageTag logo" width="300px" style="border: 1px solid black;"/>
+</center>
 Image Tag - Concept and Design
 ----------
 
