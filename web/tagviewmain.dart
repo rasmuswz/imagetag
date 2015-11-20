@@ -101,6 +101,8 @@ class ImageGridController {
     _model.LoadImage(image,img);
     _large.children.add(img);
     _large.style.display = 'block';
+    _large.style.top = "${window.pageYOffset}px";
+    img.style.width = "${window.innerWidth-100}px";
     _large.onClick.listen( (e) => _large.style.display = 'none');
   }
 }
