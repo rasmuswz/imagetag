@@ -1,6 +1,14 @@
+<table>
+<tr><td>
 <center>
 <img src="docs/logo.png" alt="ImageTag logo" width="300px" style="border: 1px solid black;"/>
 </center>
+</td><td>
+<center><img src="docs/screenshot.png" alt="Screenshot of tagging screen" width="300px"/></center>
+</td></tr>
+</table>
+
+
 Image Tag - Concept and Design
 ----------
 
