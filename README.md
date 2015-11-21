@@ -26,6 +26,6 @@ Technical Overview
 ----------
 
 There is a server and a browser client. The server is written in the
-[Go](www.golang.org) language while the client is written in
-[Dart](www.dartlang.org).
+[Go](http://www.golang.org) language while the client is written in
+[Dart](http://www.dartlang.org).
 
