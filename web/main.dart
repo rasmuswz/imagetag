@@ -93,6 +93,8 @@ class TagSelectController {
   ButtonElement _newTagDialogAdd;
   ButtonElement _newTagDialogCancel;
 
+  int _selectedTagIndex;
+
   TagSelectController(this._model) {
     _view = querySelector("#tag-select");
     _assignBtn = querySelector("#assign-tag");
@@ -113,13 +115,19 @@ class TagSelectController {
 
   void updateTags() {
     _view.children.clear();
-    _model.getListOfTags().forEach( (tag) {
+    List<Tag> tags = _model.getListOfTags();
+    tags.forEach( (tag) {
         OptionElement tagOption = new OptionElement();
         tagOption.innerHtml = "${tag.TheTag}";
         tagOption.value = tag.Id;
         _view.children.add(tagOption);
         print("adding tag ${tag.TheTag}");
     });
+    if (tags.length > this._selectedTagIndex) {
+      _view.selectedIndex = this._selectedTagIndex;
+    } else {
+      this._selectedTagIndex = 0;
+    }
   }
 
   void setViewController(ViewController viewController) {
@@ -142,7 +150,8 @@ class TagSelectController {
     if (selectedImage != null) {
       String tagId = _view.options[_view.selectedIndex].value;
       _model.assignTag(tagId,selectedImage);
-      _viewController.ImageSelected(selectedImage);
+      this._selectedTagIndex = _view.selectedIndex;
+      _viewController.RefreshSideBar(selectedImage);
     }
   }
 
@@ -340,6 +349,10 @@ class ViewController {
     Directory dir = _model.GetCurrent();
     _window.display(dir.getItems(),_offset);
     _sideBar.display();
+  }
+
+  void RefreshSideBar(Image image){
+    _sideBar.ImageSelected(image);
   }
 
   void ImageSelected(Image image) {
