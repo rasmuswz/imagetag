@@ -10,6 +10,7 @@ class TagFilterController {
   ViewController _viewController;
   List<Tag> currentFilter;
   List<Tag> _tags;
+  int _selectedIndex;
 
   get Tags => currentFilter;
 
@@ -25,7 +26,7 @@ class TagFilterController {
   void setViewController(ViewController vc) {
 
     this._viewController = vc;
-
+    this._selectedIndex = 0;
   }
 
   void display(List<Tag> tags) {
@@ -38,6 +39,11 @@ class TagFilterController {
       oe.onClick.listen( (oe) => this.removeTag(tag) );
       _tagSelect.children.add(oe);
     });
+    if (tags.length > _selectedIndex) {
+      _tagSelect.selectedIndex = this._selectedIndex;
+    } else {
+      this._selectedIndex = _tagSelect.selectedIndex;
+    }
   }
 
   void updateTagList() {
@@ -55,6 +61,7 @@ class TagFilterController {
   void addTagToFilter() {
     currentFilter.add(_tags[_tagSelect.selectedIndex]);
     _viewController.updateGrid(currentFilter);
+    this._selectedIndex = _tagSelect.selectedIndex;
     updateTagList();
   }
 
@@ -102,7 +109,7 @@ class ImageGridController {
     _large.children.add(img);
     _large.style.display = 'block';
     _large.style.top = "${window.pageYOffset}px";
-    img.style.width = "${window.innerWidth-100}px";
+    img.style.width = "${window.innerWidth-200}px";
     _large.onClick.listen( (e) => _large.style.display = 'none');
   }
 }
