@@ -43,31 +43,32 @@ class MainImageViewController {
     _load = querySelector("#main-image-loading-view");
     _leaveButton = querySelector("#leave-dir");
 
-    _leaveButton.onClick.listen ( (e) {
+    _leaveButton.onClick.listen((e) {
       _viewController.leaveDirectory();
     });
 
     _next = querySelector("#main-image-view-next");
     _prev = querySelector("#main-image-view-prev");
 
-    _next.onClick.listen ((e) {
-        _viewController.nextWindow();
+    _next.onClick.listen((e) {
+      _viewController.nextWindow();
     });
 
-    _prev.onClick.listen( (e) {
-        _viewController.prevWindow();
+    _prev.onClick.listen((e) {
+      _viewController.prevWindow();
     });
   }
 
   void setViewController(ViewController vc) {
     this._viewController = vc;
   }
+
   void setImage(Image image) {
     _view.style.display = 'none';
     _load.style.display = 'block';
     _view.onLoad.listen((e) => this.swapLoadingForImage());
 
-    _viewController.LoadImage(image,_view);
+    _viewController.LoadImage(image, _view);
   }
 
   void swapLoadingForImage() {
@@ -83,7 +84,6 @@ class TagSelectController {
   ButtonElement _assignBtn;
   ViewController _viewController;
   ImageTagModel _model;
-  Image selectedImage;
   ButtonElement _addTag;
 
   //
@@ -106,22 +106,23 @@ class TagSelectController {
     _newTagDialogAdd = querySelector("#new-tag-add");
     _newTagDialogCancel = querySelector("#new-tag-cancel");
 
-    _assignBtn.onClick.listen( (e) => this.AssignTagForImage());
+    _assignBtn.onClick.listen((e) => this.AssignTagForImage());
     _addTag.onClick.listen((e) => this.AddTag());
-    _newTagDialogAdd.onClick.listen( (e) => this.DoAddTag());
-    _newTagDialogCancel.onClick.listen( (e) => this.CancelAddTag());
+    _newTagDialogAdd.onClick.listen((e) => this.DoAddTag());
+    _newTagDialogCancel.onClick.listen((e) => this.CancelAddTag());
+    this._selectedTagIndex = 0;
 
   }
 
   void updateTags() {
     _view.children.clear();
     List<Tag> tags = _model.getListOfTags();
-    tags.forEach( (tag) {
-        OptionElement tagOption = new OptionElement();
-        tagOption.innerHtml = "${tag.TheTag}";
-        tagOption.value = tag.Id;
-        _view.children.add(tagOption);
-        print("adding tag ${tag.TheTag}");
+    tags.forEach((tag) {
+      OptionElement tagOption = new OptionElement();
+      tagOption.innerHtml = "${tag.TheTag}";
+      tagOption.value = tag.Id;
+      _view.children.add(tagOption);
+      print("adding tag ${tag.TheTag}");
     });
     if (tags.length > this._selectedTagIndex) {
       _view.selectedIndex = this._selectedTagIndex;
@@ -134,7 +135,7 @@ class TagSelectController {
     this._viewController = viewController;
   }
 
-  void hide(){
+  void hide() {
     _view.style.display = 'none';
   }
 
@@ -142,16 +143,15 @@ class TagSelectController {
     _view.style.display = 'block';
   }
 
-  void ImageSelected(Image image) {
-    this.selectedImage = image;
-  }
-
   void AssignTagForImage() {
-    if (selectedImage != null) {
+    List<Image> selectedImages = _viewController.SelectedImages;
+    if (selectedImages.length > 0) {
       String tagId = _view.options[_view.selectedIndex].value;
-      _model.assignTag(tagId,selectedImage);
       this._selectedTagIndex = _view.selectedIndex;
-      _viewController.RefreshSideBar(selectedImage);
+      selectedImages.forEach((image) {
+        _model.assignTag(tagId, image);
+      });
+      _viewController.RefreshSideBar();
     }
   }
 
@@ -167,8 +167,8 @@ class TagSelectController {
 
   void DoAddTag() {
     String tagTag = _newTagTag.value;
-    String tagDesc= _newTagDescription.value;
-    _model.AddNewTag(tagTag,tagDesc);
+    String tagDesc = _newTagDescription.value;
+    _model.AddNewTag(tagTag, tagDesc);
     clearAddTagDialog();
     updateTags();
   }
@@ -192,20 +192,20 @@ class AssignedTagListController {
     print("Running dosplay on assigned tag list");
     _view.children.clear();
     List<Tag> tagsForImage = _model.getTagsForImage(image);
-    tagsForImage.forEach( (tag) {
+    tagsForImage.forEach((tag) {
       LIElement tagElm = new LIElement();
       tagElm.innerHtml = "${tag.TheTag}";
       tagElm.className = "list-group-item";
       SpanElement delete = new SpanElement();
       delete.className = "glyphicon glyphicon-remove";
       tagElm.children.add(delete);
-      delete.onClick.listen( (e) => this.removeTag(tag,image));
+      delete.onClick.listen((e) => this.removeTag(tag, image));
       _view.children.add(tagElm);
     });
   }
 
   void removeTag(Tag tag, Image image) {
-    _model.removeTag(tag,image);
+    _model.removeTag(tag, image);
     display(image);
   }
 
@@ -219,6 +219,7 @@ class ImageThumbItemViewController {
 
   Element _text;
   ViewController _viewController;
+  String defaultBorder;
 
 
   ImageThumbItemViewController(this._viewController, int i, int j) {
@@ -237,11 +238,13 @@ class ImageThumbItemViewController {
       _text.style.display = 'block';
       _load.style.display = 'none';
     });
+
+    defaultBorder = _image.style.border;
   }
 
   void loading() {
     _image.style.display = 'none';
-    _text.style.display='none';
+    _text.style.display = 'none';
     _load.style.display = 'block';
 
   }
@@ -262,21 +265,29 @@ class ImageThumbItemViewController {
       if (this._imageOnClick != null) {
         this._imageOnClick.cancel();
       }
-      this._imageOnClick = _image.onClick.listen( (e) {
+      this._imageOnClick = _image.onClick.listen((e) {
         _viewController.EnterDirectory(dir);
       });
     }
 
     if (item.IsImage) {
       Image image = item;
-      _viewController.LoadThumbImage(image,_image);
+      _viewController.LoadThumbImage(image, _image);
       _text.innerHtml = image.Name;
       if (this._imageOnClick != null) {
         this._imageOnClick.cancel();
       }
       this._imageOnClick = _image.onClick.listen((e) {
-        _viewController.ImageSelected(image);
+        setSelected(_viewController.ImageSelected(image));
       });
+    }
+  }
+
+  void setSelected(bool isSelected) {
+    if (isSelected) {
+      _image.style.border = "5px solid blue";
+    } else {
+      _image.style.border = this.defaultBorder;
     }
   }
 
@@ -288,10 +299,11 @@ class SlidingImageWindowController {
   List<ImageThumbItemViewController> _views;
   ViewController _viewController;
   Element _path;
-
+  SpanElement _unselectAll;
 
   SlidingImageWindowController() {
     _path = querySelector("#path-so-far");
+    _unselectAll = querySelector("#unselect-all");
   }
 
   void initialize() {
@@ -307,6 +319,10 @@ class SlidingImageWindowController {
   void setViewController(ViewController viewController) {
     this._viewController = viewController;
     initialize();
+    _unselectAll.onClick.listen( (e) {
+      _viewController.clearSelected();
+    });
+
   }
 
   void display(List<Item> items, int offset) {
@@ -320,6 +336,12 @@ class SlidingImageWindowController {
         view.hide();
       }
     }
+  }
+
+  void setAllItemsSelected(bool selected) {
+    _views.forEach( (i) {
+        i.setSelected(selected);
+    });
   }
 
   void ImageSelected(Image image) {
@@ -337,63 +359,98 @@ class ViewController {
   SlidingImageWindowController _window;
   ImageTagModel _model;
   int _offset;
+  List<Image> _selectedImages;
+
 
   ViewController(this._mainImage, this._sideBar, this._window, this._model) {
     _window.setViewController(this);
     _mainImage.setViewController(this);
     _sideBar.setViewController(this);
+    _selectedImages = new List<Image>();
     _offset = 0;
+
   }
 
   void display() {
     Directory dir = _model.GetCurrent();
-    _window.display(dir.getItems(),_offset);
+    _window.display(dir.getItems(), _offset);
     _sideBar.display();
   }
 
-  void RefreshSideBar(Image image){
-    _sideBar.ImageSelected(image);
+  void RefreshSideBar() {
+    if (_selectedImages.length > 0) {
+      _sideBar.ImageSelected(_selectedImages[_selectedImages.length - 1]);
+    }
   }
 
-  void ImageSelected(Image image) {
-    _mainImage.setImage(image);
-    _sideBar.ImageSelected(image);
-    _window.ImageSelected(image);
+  bool toggleSelectedImage(Image image) {
+    if (_selectedImages.contains(image)) {
+      _selectedImages.remove(image);
+      return false;
+    } else {
+      _selectedImages.add(image);
+      return true;
+    }
+  }
+
+  get SelectedImages => _selectedImages;
+
+  bool ImageSelected(Image image) {
+    bool newSelectedState = toggleSelectedImage(image);
+    if (_selectedImages.length > 0) {
+      Image img = _selectedImages[_selectedImages.length - 1];
+      _mainImage.setImage(img);
+      _sideBar.ImageSelected(img);
+      _window.ImageSelected(img);
+    }
+    return newSelectedState;
+  }
+
+  void clearSelected() {
+    _selectedImages.clear();
+    _window.setAllItemsSelected(false);
   }
 
   void EnterDirectory(Directory dir) {
     _model.enterDirectory(dir);
     _window.DirectorySelected(_model.current);
     _offset = 0;
+    clearSelected();
     display();
   }
 
   void LoadThumbImage(Image img, ImageElement elm) {
-    _model.LoadThumbImage(img,elm);
+    _model.LoadThumbImage(img, elm);
   }
 
   void LoadImage(Image img, ImageElement elm) {
-    _model.LoadImage(img,elm);
+    _model.LoadImage(img, elm);
   }
 
   void leaveDirectory() {
     _model.leaveDirectory();
     _offset = 0;
     _window.DirectorySelected(_model.current);
+    clearSelected();
     display();
 
   }
 
   void nextWindow() {
-    this._offset += 10;
-    display();
+    int noItems = _model.current.getItems().length;
+    if (this._offset < noItems-10) {
+      this._offset += 10;
+      clearSelected();
+      display();
+    }
   }
 
   void prevWindow() {
-    if (this._offset > 10) {
-      this._offset -= 10;
+    if (this._offset > 0) {
+      this._offset -= (this._offset > 10 ? 10 : this._offset);
+      clearSelected();
+      display();
     }
-    display();
   }
 }
 
@@ -420,7 +477,6 @@ class InfoSideBarController {
   void ImageSelected(Image image) {
     _tagSelector.updateTags();
     _tagSelector.display();
-    _tagSelector.ImageSelected(image);
     _tagList.display(image);
     _imageName.innerHtml = image.Name;
   }

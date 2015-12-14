@@ -10,7 +10,9 @@ class TagFilterController {
   ViewController _viewController;
   List<Tag> currentFilter;
   List<Tag> _tags;
+  AnchorElement _tagDownloadLink;
   int _selectedIndex;
+
 
   get Tags => currentFilter;
 
@@ -18,6 +20,7 @@ class TagFilterController {
     _tagSelect = querySelector("#tag-filter-select");
     _tagAdd = querySelector("#tag-filter-add");
     _tagFilterTags = querySelector("#tag-filter-tags");
+    _tagDownloadLink = querySelector("#download-link");
     _tagAdd.onClick.listen((e) => this.addTagToFilter());
     currentFilter = new List<Tag>();
 
@@ -35,7 +38,7 @@ class TagFilterController {
     tags.forEach( (tag) {
       OptionElement oe = new OptionElement();
       oe.value = tag.Id;
-      oe.text = tag.TheTag;
+      oe.text = " "+tag.TheTag;
       oe.onClick.listen( (oe) => this.removeTag(tag) );
       _tagSelect.children.add(oe);
     });
@@ -63,6 +66,13 @@ class TagFilterController {
     _viewController.updateGrid(currentFilter);
     this._selectedIndex = _tagSelect.selectedIndex;
     updateTagList();
+    if (currentFilter.length > 0) {
+      Tag t = currentFilter[0];
+      _tagDownloadLink.href = "/imagetag?action=tagaszip&tag=" + t.TheTag;
+    } else {
+      _tagDownloadLink.href = "#";
+    }
+
   }
 
   void removeTag(Tag tag) {

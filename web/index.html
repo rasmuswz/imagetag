@@ -19,66 +19,15 @@
 </head>
 <body>
 
-
-<div class="panel panel-primary" style="display: none;" id="new-tag-dialog">
-    <div class="panel-heading">Add Tag</div>
-    <div class="panel-body">
-        <input type="text" id="new-tag-tag" class="form-control"/>
-        <textarea id="new-tag-description" class="form-control">
-
-        </textarea>
-        <button id="new-tag-add" class="btn"><span class="glyphicon glyphicon-plus"></span>Add</button>
-        <button id="new-tag-cancel" class="btn"><span class="glyphicon glyphicon-remove-sign"></span>Cancel</button>
-    </div>
-
-</div>
-
-<div class="row">
-    <div class="col-md-3 col-xs-offset-1">
-        <div class="panel panel-default" style="min-height: 350px;">
-            <div class="panel-heading">Image Information</div>
-            <div class="panel-body">
-                <h3 id="sidebar-image-name"></h3>
-                <form class="form-group">
-                    <select id="tag-select" style="display: none;" class="form-control col-md-6">
-                        <option value="-1">No tag</option>
-                    </select><br/>&nbsp;<br/>
-                    <button id="add-tag-btn" style="btn"><span class="glyphicon glyphicon-plus"></span>Add Tag</button>
-                    &nbsp;
-                    <button id="assign-tag" style="btn"><span class="glyphicon glyphicon-tags"></span>Assign</button>
-                </form>
-                <ul id="tag-list" class="list-group">
-                    <li class="list-group-item">Hey</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-7 col-offset-5">
-        <div class="panel panel-default" style="min-height: 350px;">
-            <div class="panel-heading">
-                <h5>Image</h5>
-            </div>
-            <div class="panel-body">
-                <img src="" alt="mainImage" id="main-image-view"
-                     style="display: none;min-height:400px;max-height:400px;"/>
-                <img src="images/loading.gif" width="400px" id="main-image-loading-view"
-                     style="display: none;min-height:400px;max-height:400px;">
-            </div>
-        </div>
-
-    </div>
-</div>
-
-
 <div class="row col-md-12 col-md-offset-0" style="min-height: 100px;">
     <div class="panel panel-default">
         <div class="panel-body">
-            <small id="path-so-far"></small>
+            <small id="path-so-far"></small>&nbsp;<span class="glyphicon glyphicon-th" id="unselect-all"></span>
             <div class="row">
-                <a class="thumbnail col-md-1">
-                    <span class="glyphicon glyphicon-backward" id="main-image-view-prev"></span>
-                </a>
+                <button id="main-image-view-prev" class="btn pull-left col-md-1">
+                    <span class="glyphicon glyphicon-backward" ></span>
+                </button>
+
 
                 <a href="#" class="thumbnail col-md-1">
                     <img src="" alt="img11" id="img11" class="thumb"/>
@@ -151,13 +100,13 @@
                     </center>
                 </a>
 
-                <a class="thumbnail col-md-1">
-                    <span class="glyphicon glyphicon-forward pull-right" id="main-image-view-next"></span>
-                </a>
+                <button id="main-image-view-next" class="btn pull-right col-md-1">
+                    <span class="glyphicon glyphicon-forward" ></span>
+                </button>
             </div>
             <div class="row">
 
-
+                <button class="btn" id="leave-dir"><span class="glyphicon glyphicon-arrow-up"></span></button>
                 <a href="#" class="thumbnail col-md-1 col-md-offset-1">
                     <img src="" alt="img11" id="img21" class="thumb"/>
                     <img src="images/loading.gif" class="thumb" style="display: none;" id="ldr21"/>
@@ -230,10 +179,58 @@
                 </a>
 
             </div>
-            <center><span class="glyphicon glyphicon-arrow-up" id="leave-dir"></span></center>
+
         </div>
     </div>
 </div>
+
+<div class="panel panel-primary" style="display: none;" id="new-tag-dialog">
+    <div class="panel-heading">Add Tag</div>
+    <div class="panel-body">
+        <input type="text" id="new-tag-tag" class="form-control"/>
+        <textarea id="new-tag-description" class="form-control">
+
+        </textarea>
+        <button id="new-tag-add" class="btn"><span class="glyphicon glyphicon-plus"></span>Add</button>
+        <button id="new-tag-cancel" class="btn"><span class="glyphicon glyphicon-remove-sign"></span>Cancel</button>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-3 col-xs-offset-1">
+        <div class="panel panel-default" style="min-height: 350px;">
+            <div class="panel-heading">Image Information</div>
+            <div class="panel-body">
+                <h3 id="sidebar-image-name"></h3>
+                <form class="form-group">
+                    <select id="tag-select" style="display: none;" class="form-control col-md-6">
+                        <option value="-1">No tag</option>
+                    </select><br/>&nbsp;<br/>
+                    <button id="add-tag-btn" style="btn"><span class="glyphicon glyphicon-plus"></span>Add Tag</button>
+                    &nbsp;
+                    <button id="assign-tag" style="btn"><span class="glyphicon glyphicon-tags"></span>Assign</button>
+                </form>
+                <ul id="tag-list" class="list-group">
+                    <li class="list-group-item">Hey</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7 col-offset-5">
+        <div class="panel panel-default" style="min-height: 350px;">
+            <div class="panel-body">
+                <img src="" alt="mainImage" id="main-image-view"
+                     style="display: none;min-height:300px;max-height:300px;"/>
+                <img src="images/loading.gif" width="300px" id="main-image-loading-view"
+                     style="display: none;min-height:400px;max-height:400px;">
+            </div>
+        </div>
+
+    </div>
+</div>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="js/bootstrap.min.js"></script>

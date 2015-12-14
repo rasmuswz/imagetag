@@ -21,6 +21,7 @@ import (
 	"strconv"
 	"errors"
 	"encoding/base64"
+	"archive/zip"
 )
 
 const (
@@ -38,6 +39,7 @@ const (
 	REMOVE_TAG_FOR_IMAGE_ACTION = "removetag";
 	ADD_NEW_TAG_ACTION = "newtag";
 	GET_IMG_WITH_TAGS_ACTION = "imgwithtags";
+	GET_TAG_AS_ZIP="tagaszip";
 
 	ITEM_TYPE_DIR = "dir";
 	ITEM_TYPE_IMG = "img";
@@ -582,6 +584,52 @@ const GET_IMAGE_ACTION = "getimage";
 
 const GET_THUMB_IMAGE_ACTION = "getthumb";
 
+func (ths * ImageTagServer) get_tag_as_zip(w http.ResponseWriter, r * http.Request) {
+
+	tag := r.URL.Query().Get("tag");
+
+	db := ths.get_db();
+	if db == nil {
+		http.Error(w,"Database error.",http.StatusInternalServerError);
+		return;
+	}
+
+	res,resErr := db.Query("SELECT Path FROM (Image INNER JOIN Assignment ON Id = ImageId)"+
+	" INNER JOIN Tags ON TagId = Tags.Id WHERE Tag LIKE '"+tag+"'");
+	if resErr != nil {
+		http.Error(w,resErr.Error(),http.StatusInternalServerError);
+		return;
+	}
+
+	buffer := new(bytes.Buffer);
+	zipArchive := zip.NewWriter(buffer);
+	defer zipArchive.Close();
+
+	for res.Next() {
+		var path string = "";
+		err := res.Scan(&path)
+		if err != nil {
+			http.Error(w,err.Error(),http.StatusInternalServerError);
+			return;
+		}
+
+		fileBuffer, fileErr := ioutil.ReadFile(ths.imgRoot+path);
+		if fileErr != nil {
+			http.Error(w,fileErr.Error(),http.StatusInternalServerError);
+			return;
+		}
+
+		fileName := path[strings.LastIndex(path,"/")+1:];
+		file,fileErr := zipArchive.Create(fileName);
+		file.Write(fileBuffer);
+	}
+
+	zipArchive.Close();
+	w.Header().Add("Content-Disposition","attachment; filename=tags.zip;");
+	w.Header().Add("Content-Type","application/zip, application/octet-stream");
+	w.Write(buffer.Bytes());
+}
+
 func (ths *ImageTagServer) serveApi(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close();
 
@@ -634,6 +682,10 @@ func (ths *ImageTagServer) serveApi(w http.ResponseWriter, r *http.Request) {
 		return;
 	}
 
+	if (strings.Compare(action,GET_TAG_AS_ZIP) == 0) {
+		ths.get_tag_as_zip(w,r);
+		return;
+	}
 
 	http.Error(w, "Unsupported action " + action, http.StatusBadRequest);
 }

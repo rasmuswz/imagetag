@@ -14,10 +14,10 @@ def get_tag():
 
 def build_dart(tag):
     dartfile="dart_"+tag+".tgz"
-    if not os.path.isfile(dartfile):
-        local("pub get")
-        local("pub build")
-        local("tar cmvzf " + dartfile+" --exclude .git build/web");
+#    if not os.path.isfile(dartfile):
+    local("pub get")
+    local("pub build --mode=debug   ")
+    local("tar cmvzf " + dartfile+" --exclude .git build/web");
     return dartfile;
 
 
